@@ -5,6 +5,7 @@
 (function () {
   let currentCampaigns = [];
   let selectedCampaignId = null;
+  let lastUploadedCampaignId = null;
   let attackGraphData = { nodes: [], edges: [] };
   let graphAnimationId = null;
 
@@ -42,7 +43,17 @@
         } else if (selectedCampaignId) {
           // Re-render selected campaign details
           const active = currentCampaigns.find(c => c.campaign_id === selectedCampaignId);
-          if (active) renderCampaignDetail(active);
+          if (active) {
+            renderCampaignDetail(active);
+          } else if (currentCampaigns.length === 0) {
+            document.getElementById("detailEmptyView").style.display = "flex";
+            document.getElementById("detailContentView").style.display = "none";
+            document.getElementById("detailCampaignTitle").textContent = "Select a Campaign to Inspect";
+          }
+        } else if (currentCampaigns.length === 0) {
+          document.getElementById("detailEmptyView").style.display = "flex";
+          document.getElementById("detailContentView").style.display = "none";
+          document.getElementById("detailCampaignTitle").textContent = "Select a Campaign to Inspect";
         }
       }
     } catch (err) {
@@ -74,15 +85,19 @@
 
     container.innerHTML = campaigns.map(c => {
       const isSelected = c.campaign_id === selectedCampaignId;
+      const isJustUploaded = c.campaign_id === lastUploadedCampaignId;
       const riskLevel = (c.risk_level || "low").toLowerCase();
       const riskScore = c.risk_score || 0;
       const eventCount = c.event_count || c.events.length;
       const engines = [...new Set(c.events.map(e => e.source_engine))].join(" • ");
 
       return `
-        <div class="campaign-card ${isSelected ? 'selected' : ''}" onclick="window.selectCampaign('${c.campaign_id}')">
+        <div class="campaign-card ${isSelected ? 'selected' : ''} ${isJustUploaded ? 'just-uploaded' : ''}" data-cid="${c.campaign_id}" onclick="window.selectCampaign('${c.campaign_id}')">
           <div class="card-top-row">
-            <span class="card-cid">${c.campaign_id}</span>
+            <span>
+              <span class="card-cid">${c.campaign_id}</span>
+              ${isJustUploaded ? '<span class="uploaded-pill">⚡ JUST ANALYZED</span>' : ''}
+            </span>
             <span class="severity-pill ${riskLevel}">${riskLevel.toUpperCase()} (${riskScore})</span>
           </div>
           <h3 class="card-title">${escapeHtml(c.title || 'Multi-Stage Incident')}</h3>
@@ -385,7 +400,7 @@
   }
 
   // =========================================================================
-  // FILE INGESTION & SCENARIO LOADERS
+  // FILE INGESTION, RESET & SCENARIO LOADERS
   // =========================================================================
 
   function setupDropZone() {
@@ -414,6 +429,47 @@
     });
   }
 
+  window.resetDemoData = async function () {
+    if (!confirm("Are you sure you want to reset all active campaigns and demo data? This will clear the correlation graph and uploaded artifacts.")) {
+      return;
+    }
+
+    try {
+      const btn = document.getElementById("btnResetDemo");
+      if (btn) btn.innerHTML = `Resetting...`;
+
+      const res = await fetch("/api/reset", { method: "POST" });
+      if (res.ok) {
+        selectedCampaignId = null;
+        lastUploadedCampaignId = null;
+        currentCampaigns = [];
+        attackGraphData = { nodes: [], edges: [] };
+        
+        document.getElementById("detailEmptyView").style.display = "flex";
+        document.getElementById("detailContentView").style.display = "none";
+        document.getElementById("detailCampaignTitle").textContent = "Select a Campaign to Inspect";
+        
+        await loadDashboardData();
+        
+        if (btn) {
+          btn.innerHTML = `
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="reset-icon">
+              <path d="M3 6h18M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/>
+              <line x1="10" y1="11" x2="10" y2="17"/>
+              <line x1="14" y1="11" x2="14" y2="17"/>
+            </svg>
+            Reset Demo Data
+          `;
+        }
+      } else {
+        alert("Failed to reset demo data.");
+      }
+    } catch (err) {
+      console.error("Reset error:", err);
+      alert("Error connecting to reset endpoint.");
+    }
+  };
+
   window.handleFileSelect = async function (files) {
     if (!files || files.length === 0) return;
     const file = files[0];
@@ -437,10 +493,21 @@
 
       if (res.ok) {
         const data = await res.json();
-        alert(`Analysis Complete!\nClassified as: ${data.event.source_engine}\nEvent Type: ${data.event.event_type}\nAssigned to Campaign: ${data.campaign.campaign_id}`);
+        const targetCid = data.campaign ? data.campaign.campaign_id : null;
+        lastUploadedCampaignId = targetCid;
+        selectedCampaignId = targetCid;
+
         await loadDashboardData();
-        if (data.campaign && data.campaign.campaign_id) {
-          window.selectCampaign(data.campaign.campaign_id);
+
+        if (targetCid) {
+          await window.selectCampaign(targetCid);
+          // Highlight and smoothly scroll to the resulting campaign card
+          setTimeout(() => {
+            const targetCard = document.querySelector(`.campaign-card[data-cid="${targetCid}"]`);
+            if (targetCard) {
+              targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          }, 100);
         }
       } else {
         const err = await res.json();
@@ -460,9 +527,18 @@
       });
       if (res.ok) {
         const data = await res.json();
+        const cid = data.campaign ? data.campaign.campaign_id : null;
+        lastUploadedCampaignId = cid;
+        selectedCampaignId = cid;
         await loadDashboardData();
-        if (data.campaign && data.campaign.campaign_id) {
-          window.selectCampaign(data.campaign.campaign_id);
+        if (cid) {
+          window.selectCampaign(cid);
+          setTimeout(() => {
+            const targetCard = document.querySelector(`.campaign-card[data-cid="${cid}"]`);
+            if (targetCard) {
+              targetCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }
+          }, 100);
         }
       } else {
         alert("Failed to load demo scenario.");

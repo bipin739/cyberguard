@@ -124,7 +124,35 @@ body.cyber-theme {
 .nav-actions {
   display: flex;
   align-items: center;
-  gap: 20px;
+  gap: 16px;
+}
+
+.btn-reset-demo {
+  background: rgba(244, 63, 94, 0.08);
+  color: var(--accent-rose);
+  border: 1px solid rgba(244, 63, 94, 0.3);
+  border-radius: var(--radius-sm);
+  padding: 7px 12px;
+  font-size: 12px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: var(--font-sans);
+}
+
+.btn-reset-demo:hover {
+  background: rgba(244, 63, 94, 0.2);
+  border-color: var(--accent-rose);
+  box-shadow: 0 0 12px rgba(244, 63, 94, 0.3);
+  transform: translateY(-1px);
+}
+
+.reset-icon {
+  width: 14px;
+  height: 14px;
 }
 
 .scenario-selector-group {
@@ -521,6 +549,37 @@ body.cyber-theme {
   bottom: 0;
   width: 4px;
   background: var(--accent-cyan);
+}
+
+.campaign-card.just-uploaded {
+  border-color: var(--accent-cyan) !important;
+  background: rgba(0, 242, 254, 0.12) !important;
+  animation: upload-pulse-glow 1.2s ease-in-out infinite alternate;
+}
+
+@keyframes upload-pulse-glow {
+  0% {
+    box-shadow: 0 0 15px rgba(0, 242, 254, 0.35), inset 0 0 10px rgba(0, 242, 254, 0.15);
+    transform: translateY(-2px);
+  }
+  100% {
+    box-shadow: 0 0 35px rgba(0, 242, 254, 0.75), inset 0 0 20px rgba(0, 242, 254, 0.3);
+    transform: translateY(-4px);
+  }
+}
+
+.uploaded-pill {
+  font-size: 9px;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: var(--radius-sm);
+  background: var(--accent-cyan);
+  color: #080b11;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .card-top-row {

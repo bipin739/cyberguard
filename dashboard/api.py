@@ -20,6 +20,31 @@ UPLOADS_DIR = BASE_DIR / "uploads"
 UPLOADS_DIR.mkdir(parents=True, exist_ok=True)
 
 
+@router.post("/api/reset")
+async def reset_demo_data():
+    """
+    Clears all campaigns and events from the correlation engine's in-memory state
+    and removes all uploaded files from uploads/ directory (except .gitkeep).
+    """
+    correlation_engine.reset()
+
+    # Clear uploads directory
+    cleared_files_count = 0
+    if UPLOADS_DIR.exists():
+        for file_path in UPLOADS_DIR.iterdir():
+            if file_path.is_file() and file_path.name != ".gitkeep":
+                try:
+                    file_path.unlink()
+                    cleared_files_count += 1
+                except Exception:
+                    pass
+
+    return {
+        "status": "ok",
+        "message": f"Successfully cleared all in-memory campaigns and {cleared_files_count} upload file(s)."
+    }
+
+
 @router.get("/api/stats")
 async def get_stats():
     """Returns overview KPI metrics for the SOC dashboard."""

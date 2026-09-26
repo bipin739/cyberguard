@@ -100,6 +100,13 @@ class CorrelationEngine:
         self.event_index: Dict[str, Dict[str, Any]] = {}
         self._campaign_seq = 1
 
+    def reset(self):
+        """Clears all in-memory campaigns, events, and graph state."""
+        self.graph.clear()
+        self.campaigns.clear()
+        self.event_index.clear()
+        self._campaign_seq = 1
+
     def _generate_campaign_id(self) -> str:
         today_str = datetime.now(timezone.utc).strftime("%Y-%m-%d")
         cid = f"camp_{today_str}-{self._campaign_seq:04d}"

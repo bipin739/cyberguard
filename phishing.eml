@@ -1,0 +1,15 @@
+From: security-alerts@paypa1-secure.com
+To: bipin.p@company.com
+Subject: URGENT: Verify Your Account Credentials Immediately
+Date: Sat, 26 Sep 2026 09:12:00 +0000
+Authentication-Results: spf=fail (sender IP not authorized)
+
+Dear customer,
+
+Your corporate account access will be permanently suspended within 24 hours due to suspicious activity.
+Please verify your identity and confirm your credentials immediately to avoid service interruption:
+
+https://paypa1-secure.com/login
+
+Sincerely,
+Security Team
