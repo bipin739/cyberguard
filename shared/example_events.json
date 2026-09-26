@@ -1,0 +1,87 @@
+[
+  {
+    "_comment": "Example 1 — from the EMAIL engine (MailTraceAI)",
+    "event_id": "evt_1a2b3c4d",
+    "source_engine": "email",
+    "timestamp": "2026-09-26T09:12:00Z",
+    "event_type": "phishing_email_detected",
+    "confidence": 0.92,
+    "entities": {
+      "user_email": "bipin.p@company.com",
+      "domain": "paypa1-secure.com",
+      "url": "https://paypa1-secure.com/login",
+      "campaign_id": null
+    },
+    "iocs": [
+      { "type": "domain", "value": "paypa1-secure.com", "source": "internal_heuristic" },
+      { "type": "url", "value": "https://paypa1-secure.com/login", "source": "URLhaus" }
+    ],
+    "evidence": [
+      { "description": "Sender domain 'paypa1-secure.com' is a one-character lookalike of 'paypal.com'", "field_ref": "domain", "weight": 0.5 },
+      { "description": "Email requests urgent credential verification within 24 hours", "field_ref": "body_text", "weight": 0.3 },
+      { "description": "SPF check failed for sending domain", "field_ref": "headers", "weight": 0.2 }
+    ],
+    "raw_reference": "uploads/2026-09-26/1a2b3c4d.eml",
+    "mitre_technique": null,
+    "risk_level": null,
+    "response_recommended": null
+  },
+  {
+    "_comment": "Example 2 — from the NETWORK/LOGIN engine",
+    "event_id": "evt_5e6f7g8h",
+    "source_engine": "network",
+    "timestamp": "2026-09-26T09:14:30Z",
+    "event_type": "new_device_login",
+    "confidence": 0.81,
+    "entities": {
+      "user_email": "bipin.p@company.com",
+      "device_id": "dev_unknown_77",
+      "ip_address": "203.0.113.42",
+      "session_id": "sess_9f8e7d",
+      "campaign_id": null
+    },
+    "iocs": [
+      { "type": "ip", "value": "203.0.113.42", "source": "internal_heuristic" }
+    ],
+    "evidence": [
+      { "description": "Login occurred from a device not seen for this account in the last 90 days", "field_ref": "device_id", "weight": 0.6 },
+      { "description": "IP geolocation is 1,200km from the user's usual login region", "field_ref": "ip_address", "weight": 0.4 }
+    ],
+    "raw_reference": "logs/auth/2026-09-26.log#L4821",
+    "mitre_technique": null,
+    "risk_level": null,
+    "response_recommended": null
+  },
+  {
+    "_comment": "Example 3 — from the DEEPFAKE AUDIO engine",
+    "event_id": "evt_9i0j1k2l",
+    "source_engine": "deepfake_audio",
+    "timestamp": "2026-09-26T09:20:00Z",
+    "event_type": "deepfake_audio_detected",
+    "confidence": 0.76,
+    "entities": {
+      "user_account_id": "acct_ceo_master",
+      "campaign_id": null
+    },
+    "iocs": [],
+    "evidence": [
+      { "description": "Voice authenticity model score indicates 76% likelihood of synthetic generation", "field_ref": "audio_features", "weight": 0.5 },
+      { "description": "Caller claimed identity of CEO but call originated from an unregistered number", "field_ref": "caller_id", "weight": 0.3 },
+      { "description": "Request pattern (urgent wire transfer) matches known social-engineering scripts", "field_ref": "request_type", "weight": 0.2 }
+    ],
+    "raw_reference": "uploads/2026-09-26/9i0j1k2l.wav",
+    "mitre_technique": null,
+    "risk_level": null,
+    "response_recommended": null
+  },
+  {
+    "_comment": "Example 4 — what the CORRELATION ENGINE does to events 1 and 2 after grouping them (fields it fills in are shown; everything else is untouched)",
+    "note": "The correlation engine does not rewrite events — it fills previously-null fields once a group is confirmed.",
+    "updates": [
+      { "event_id": "evt_1a2b3c4d", "entities.campaign_id": "camp_2026-09-26-0001", "mitre_technique": "T1566.002" },
+      { "event_id": "evt_5e6f7g8h", "entities.campaign_id": "camp_2026-09-26-0001", "mitre_technique": "T1078" }
+    ],
+    "campaign_risk_level": "high",
+    "campaign_response_recommended": "revoke_session_and_require_mfa"
+  }
+]

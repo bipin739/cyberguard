@@ -1,0 +1,134 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "CyberGuard Event",
+  "description": "The one shared output shape every detection engine (email, URL, network, malware, deepfake audio/video, threat intel) must produce. Nothing downstream (correlation, attack graph, risk, explanation, dashboard) reads anything except this shape.",
+  "type": "object",
+  "required": [
+    "event_id",
+    "source_engine",
+    "timestamp",
+    "event_type",
+    "confidence",
+    "entities",
+    "iocs",
+    "evidence",
+    "raw_reference"
+  ],
+  "properties": {
+    "_comment": {
+      "type": "string",
+      "description": "Optional comment or label for testing and documentation."
+    },
+    "event_id": {
+      "type": "string",
+      "description": "Unique ID for this event. Generate as a UUID v4.",
+      "example": "evt_8f14e45f-ceea-4b19-9d29-1a2b3c4d5e6f"
+    },
+    "source_engine": {
+      "type": "string",
+      "description": "Which engine produced this event. Fixed value per engine.",
+      "enum": ["email", "url", "network", "malware", "deepfake_audio", "deepfake_video", "threat_intel"]
+    },
+    "timestamp": {
+      "type": "string",
+      "format": "date-time",
+      "description": "When the underlying activity happened (ISO 8601, UTC). Not when the engine finished processing it.",
+      "example": "2026-09-26T14:32:05Z"
+    },
+    "event_type": {
+      "type": "string",
+      "description": "Specific label for what was detected. Keep this list agreed as a team so correlation/MITRE mapping can match on it.",
+      "examples": [
+        "phishing_email_detected",
+        "lookalike_domain_detected",
+        "malicious_url_click",
+        "suspicious_login",
+        "new_device_login",
+        "brute_force_attempt",
+        "abnormal_api_activity",
+        "data_exfiltration_attempt",
+        "malware_detected",
+        "deepfake_audio_detected",
+        "deepfake_video_detected",
+        "threat_intel_match",
+        "not_implemented_yet",
+        "unclassified_file"
+      ]
+    },
+    "confidence": {
+      "type": "number",
+      "minimum": 0,
+      "maximum": 1,
+      "description": "This engine's own confidence that event_type is correct. NOT the final risk level — risk level is computed later by the Risk Scoring layer from multiple correlated events."
+    },
+    "entities": {
+      "type": "object",
+      "description": "Real-world things this event touches. Fill only what applies — leave others out entirely, don't send null placeholders. Correlation matches events by comparing these fields, so use consistent formats (e.g. always lowercase emails, always the same IP format) across every engine.",
+      "properties": {
+        "user_email": { "type": "string", "example": "victim@example.com" },
+        "user_account_id": { "type": "string", "example": "acct_10293" },
+        "device_id": { "type": "string", "example": "dev_a1b2c3" },
+        "ip_address": { "type": "string", "example": "203.0.113.42" },
+        "domain": { "type": "string", "example": "paypa1-secure.com" },
+        "url": { "type": "string", "example": "https://paypa1-secure.com/login" },
+        "session_id": { "type": "string", "example": "sess_9f8e7d" },
+        "file_hash_sha256": { "type": "string", "example": "3b1e...c9a2" },
+        "campaign_id": {
+          "type": ["string", "null"],
+          "description": "Leave null when the engine emits the event. The Correlation Engine fills this in when it groups this event with others into one attack chain."
+        }
+      },
+      "additionalProperties": false
+    },
+    "iocs": {
+      "type": "array",
+      "description": "Indicators of Compromise found in this event. Can be empty array if none, but the field must exist.",
+      "items": {
+        "type": "object",
+        "required": ["type", "value"],
+        "properties": {
+          "type": { "type": "string", "examples": ["domain", "url", "ip", "file_hash", "email_address"] },
+          "value": { "type": "string" },
+          "source": { "type": "string", "description": "Where this IOC was confirmed, e.g. 'PhishTank', 'URLhaus', 'internal_heuristic'" }
+        }
+      }
+    },
+    "evidence": {
+      "type": "array",
+      "description": "The specific reasons behind this event — this is what the Explainable AI layer quotes from directly, so write these as plain, specific sentences, not codes.",
+      "items": {
+        "type": "object",
+        "required": ["description"],
+        "properties": {
+          "description": {
+            "type": "string",
+            "example": "Sender domain 'paypa1-secure.com' is a one-character lookalike of 'paypal.com'"
+          },
+          "field_ref": { "type": "string", "description": "Which entity/IOC this evidence relates to, e.g. 'domain'" },
+          "weight": { "type": "number", "minimum": 0, "maximum": 1, "description": "Optional — how much this piece of evidence contributed to the confidence score" }
+        }
+      }
+    },
+    "raw_reference": {
+      "type": "string",
+      "description": "Pointer to the original uploaded file or log line this event came from (storage path or ID from the Ingestion Layer) — never the raw file content itself inside the event.",
+      "example": "uploads/2026-09-26/8f14e45f.eml"
+    },
+    "mitre_technique": {
+      "type": ["string", "null"],
+      "description": "Optional. Filled in by the Threat Intelligence / knowledge layer, not by the detecting engine itself.",
+      "example": "T1566.002"
+    },
+    "risk_level": {
+      "type": ["string", "null"],
+      "enum": ["safe", "low", "medium", "high", "critical", null],
+      "description": "Leave null when the engine emits the event. Filled in later by the Risk Scoring layer, usually at the campaign level after correlation."
+    },
+    "response_recommended": {
+      "type": ["string", "null"],
+      "description": "Leave null when the engine emits the event. Filled in by the Response Recommendation layer.",
+      "example": "quarantine_email"
+    }
+  },
+  "additionalProperties": false
+}

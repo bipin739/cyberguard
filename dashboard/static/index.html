@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CyberGuard — Next-Gen AI Threat Detection & Correlation SOC</title>
+  <meta name="description" content="Multi-engine threat detection, attack graph correlation, risk scoring, and Explainable AI dashboard.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body class="cyber-theme">
+  <!-- Top Navigation Bar -->
+  <header class="navbar">
+    <div class="nav-brand">
+      <div class="logo-shield">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shield-icon">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+          <path d="m9 12 2 2 4-4"/>
+        </svg>
+      </div>
+      <div>
+        <h1 class="brand-title">CyberGuard <span class="brand-badge">SOC AI 2.0</span></h1>
+        <p class="brand-subtitle">Multi-Engine Detection & Correlation Graph</p>
+      </div>
+    </div>
+
+    <div class="nav-actions">
+      <div class="scenario-selector-group">
+        <label for="scenarioSelect" class="scenario-label">Load Incident Scenario:</label>
+        <select id="scenarioSelect" class="scenario-select" onchange="window.loadScenario(this.value)">
+          <option value="" disabled selected>-- Select Threat Scenario --</option>
+          <option value="phishing_lateral_movement">Scenario 1: Spearphishing + Valid Account + Malware</option>
+          <option value="ceo_deepfake_vishing">Scenario 2: Executive Voice Deepfake + Wire Fraud</option>
+          <option value="brute_force_exfiltration">Scenario 3: SSH Brute Force + Data Exfiltration</option>
+        </select>
+      </div>
+
+      <div class="system-status-indicator">
+        <span class="status-pulse"></span>
+        <span class="status-text">DEFENSE ACTIVE</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Dashboard Container -->
+  <main class="dashboard-grid">
+    <!-- Row 1: KPI Metric Overview Cards -->
+    <section class="kpi-banner">
+      <div class="kpi-card" id="kpiTotalCampaigns">
+        <div class="kpi-icon-wrap cyan">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M16 16v1a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v1"/><path d="M18 8h4a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-4"/><circle cx="8" cy="12" r="2"/></svg>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-label">Active Campaigns</span>
+          <span class="kpi-value" id="valTotalCampaigns">0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiCriticalThreats">
+        <div class="kpi-icon-wrap rose">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-label">Critical Severity</span>
+          <span class="kpi-value highlight-rose" id="valCriticalCampaigns">0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiTotalEvents">
+        <div class="kpi-icon-wrap violet">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-label">Telemetry Ingested</span>
+          <span class="kpi-value" id="valTotalEvents">0</span>
+        </div>
+      </div>
+
+      <div class="kpi-card" id="kpiEngines">
+        <div class="kpi-icon-wrap emerald">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+        </div>
+        <div class="kpi-data">
+          <span class="kpi-label">Detection Engines</span>
+          <span class="kpi-value highlight-emerald">5 Active</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 2: Ingestion Zone & Quick Presets -->
+    <section class="panel ingestion-panel">
+      <div class="panel-header">
+        <h2 class="panel-title">
+          <span class="panel-icon-dot cyan"></span> Live File Ingestion & Auto-Detection Portal
+        </h2>
+        <span class="badge-subtle">Schema Draft-07 Compliant</span>
+      </div>
+      
+      <div class="ingestion-body">
+        <div class="drop-zone" id="dropZone">
+          <input type="file" id="fileInput" class="file-input-hidden" onchange="window.handleFileSelect(this.files)">
+          <div class="drop-zone-content">
+            <svg class="upload-cloud-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <p class="drop-text">Drag & drop raw threat artifacts (.eml, .log, .exe, .wav, .mp4, .pdf) or <button type="button" class="btn-browse" onclick="document.getElementById('fileInput').click()">Browse Files</button></p>
+            <p class="drop-subtext">Automatic magic byte sniffing • Path traversal sanitized • 50MB enforcement</p>
+          </div>
+        </div>
+
+        <div class="ingestion-options">
+          <div class="force-type-wrap">
+            <label for="forceTypeSelect" class="option-label">Engine Category Override:</label>
+            <select id="forceTypeSelect" class="option-select">
+              <option value="">Auto-Detect (Recommended)</option>
+              <option value="email">Email Phishing (email)</option>
+              <option value="network">Network & Auth (network)</option>
+              <option value="malware">Malware / Executable (malware)</option>
+              <option value="deepfake_audio">Deepfake Audio (deepfake_audio)</option>
+              <option value="deepfake_video">Deepfake Video (deepfake_video)</option>
+            </select>
+          </div>
+
+          <div class="demo-buttons-wrap">
+            <span class="option-label">Quick Threat Presets:</span>
+            <div class="preset-btn-group">
+              <button type="button" class="btn-preset" onclick="window.loadScenario('phishing_lateral_movement')">
+                ⚡ Phishing + Malware Chain
+              </button>
+              <button type="button" class="btn-preset" onclick="window.loadScenario('ceo_deepfake_vishing')">
+                🎙️ CEO Deepfake Vishing
+              </button>
+              <button type="button" class="btn-preset" onclick="window.loadScenario('brute_force_exfiltration')">
+                🚨 Brute Force Exfiltration
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Row 3: Two Column Layout (Left: Campaigns list, Right: Detail View) -->
+    <div class="main-split-container">
+      <!-- Left: Active Campaigns List -->
+      <section class="panel campaigns-panel">
+        <div class="panel-header">
+          <h2 class="panel-title">
+            <span class="panel-icon-dot violet"></span> Correlated Threat Campaigns
+          </h2>
+          <span class="campaign-count-badge" id="campaignCountBadge">0 Campaigns</span>
+        </div>
+        <div class="campaigns-list" id="campaignsList">
+          <div class="empty-state">
+            <p>No active campaigns. Ingest a file or load a preset scenario to initiate attack graph correlation.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- Right: Detailed Campaign Inspection Center -->
+      <section class="panel detail-panel" id="detailPanel">
+        <div class="panel-header">
+          <h2 class="panel-title" id="detailCampaignTitle">Select a Campaign to Inspect</h2>
+          <div class="detail-header-badges" id="detailHeaderBadges"></div>
+        </div>
+
+        <div class="detail-content-empty" id="detailEmptyView">
+          <svg class="radar-scan-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10"/><line x1="12" y1="12" x2="20" y2="4"/></svg>
+          <p>Select any campaign from the left column or ingest an artifact to view Attack Graphs, MITRE Tactics, and Explainable AI analysis.</p>
+        </div>
+
+        <div class="detail-content" id="detailContentView" style="display: none;">
+          <!-- Sub-section 1: Campaign Meta & Risk Bar -->
+          <div class="campaign-meta-bar">
+            <div class="risk-gauge-card">
+              <div class="gauge-header">
+                <span class="gauge-label">RISK SCORE</span>
+                <span class="gauge-badge" id="riskLevelBadge">CRITICAL</span>
+              </div>
+              <div class="gauge-val-wrap">
+                <span class="gauge-val" id="riskScoreVal">93.2</span>
+                <span class="gauge-max">/ 100</span>
+              </div>
+              <div class="risk-progress-track">
+                <div class="risk-progress-fill" id="riskProgressFill" style="width: 93%;"></div>
+              </div>
+            </div>
+
+            <div class="entities-card">
+              <h3 class="meta-section-title">Correlated Target Entities</h3>
+              <div class="entities-grid" id="entitiesGrid"></div>
+            </div>
+          </div>
+
+          <!-- Sub-section 2: MITRE ATT&CK Mapping -->
+          <div class="meta-card">
+            <h3 class="meta-section-title">MITRE ATT&CK Matrix Mapping</h3>
+            <div class="mitre-tags-list" id="mitreTagsList"></div>
+          </div>
+
+          <!-- Sub-section 3: Interactive Attack Graph -->
+          <div class="meta-card attack-graph-card">
+            <div class="graph-header">
+              <h3 class="meta-section-title">Multi-Engine Attack Kill Chain Graph</h3>
+              <span class="graph-legend">
+                <span class="legend-dot event"></span> Event Nodes
+                <span class="legend-dot entity"></span> Target Entities
+                <span class="legend-dot edge"></span> Causal Links
+              </span>
+            </div>
+            <div class="canvas-container" id="graphContainer">
+              <canvas id="attackGraphCanvas" width="800" height="340"></canvas>
+            </div>
+          </div>
+
+          <!-- Sub-section 4: Explainable AI (XAI) Insight Panel -->
+          <div class="xai-panel">
+            <div class="xai-header">
+              <div class="xai-title-wrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="xai-brain-icon"><circle cx="12" cy="12" r="9"/><line x1="3.6" y1="9" x2="20.4" y2="9"/><line x1="3.6" y1="15" x2="20.4" y2="15"/><path d="M11.5 3a17 17 0 0 0 0 18"/><path d="M12.5 3a17 17 0 0 1 0 18"/></svg>
+                <h3>Explainable AI (XAI) Diagnostic Center</h3>
+              </div>
+              <span class="badge-xai">Zero Black-Box Transparency</span>
+            </div>
+
+            <div class="xai-body">
+              <div class="xai-exec-card">
+                <h4 class="xai-sub-title">CISO Executive Summary</h4>
+                <p class="xai-text" id="xaiExecSummary">Loading summary...</p>
+              </div>
+
+              <div class="xai-narrative-card">
+                <h4 class="xai-sub-title">Chronological Attack Narrative</h4>
+                <div class="xai-narrative-content" id="xaiNarrativeContent"></div>
+              </div>
+
+              <div class="xai-evidence-card">
+                <h4 class="xai-sub-title">Key Contributing Evidence & Forensics</h4>
+                <div class="evidence-table-wrap">
+                  <table class="evidence-table">
+                    <thead>
+                      <tr>
+                        <th>Engine</th>
+                        <th>Weight</th>
+                        <th>Evidence Description</th>
+                      </tr>
+                    </thead>
+                    <tbody id="evidenceTableBody"></tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub-section 5: Automated Incident Response Action Center -->
+          <div class="response-panel">
+            <div class="response-header">
+              <h3 class="response-title">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="response-icon"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+                Automated Incident Containment Playbook
+              </h3>
+              <span class="badge-playbook" id="playbookPriority">P0 HIGH PRIORITY</span>
+            </div>
+
+            <div class="response-body">
+              <div class="playbook-info">
+                <h4 class="playbook-title" id="playbookTitle">Full Incident Containment</h4>
+                <p class="playbook-desc" id="playbookDesc">Loading containment plan...</p>
+                <ul class="playbook-steps" id="playbookSteps"></ul>
+              </div>
+
+              <div class="response-actions">
+                <button type="button" class="btn-respond" id="btnExecuteResponse" onclick="window.executeResponse()">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="btn-icon"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                  Execute Automated Containment
+                </button>
+                <div class="response-status" id="responseStatusLog" style="display: none;"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Sub-section 6: Raw Events Accordion -->
+          <div class="meta-card">
+            <h3 class="meta-section-title">Correlated Telemetry Events (<span id="eventCountBadge">0</span>)</h3>
+            <div class="events-accordion" id="eventsAccordion"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="footer">
+    <p>CyberGuard Threat Detection System • Autonomous Multi-Engine Architecture • Draft-07 Shared Schema Compliant</p>
+  </footer>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
